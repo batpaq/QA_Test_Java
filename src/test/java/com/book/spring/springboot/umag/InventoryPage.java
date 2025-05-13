@@ -2,26 +2,27 @@ package com.book.spring.springboot.umag;
 
 import com.codeborne.selenide.*;
 import org.junit.jupiter.api.function.Executable;
+
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
-import static com.codeborne.selenide.Condition.visible;
-import static com.codeborne.selenide.Selenide.$$x;
-import static com.codeborne.selenide.files.DownloadActions.click;
-import static org.junit.jupiter.api.Assertions.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+
+import static com.codeborne.selenide.Condition.appear;
+import static com.codeborne.selenide.Condition.visible;
+import static com.codeborne.selenide.Selenide.$$x;
 import static com.codeborne.selenide.Selenide.$x;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class InventoryPage {
     public static final String URL = "/store/0/inventory";
 
     private final SelenideElement filter = $x("//span[text()='Фильтр']/..");
-    private final SelenideElement buttonFromeDate = $x("(//button[@aria-label='Choose Date'])[1]");
+    private final SelenideElement buttonFromDate = $x("(//button[@aria-label='Choose Date'])[1]");
     private final SelenideElement buttonToDate = $x("(//button[@aria-label='Choose Date'])[2]");
     private final SelenideElement calendarTable = $x("//table[@role='grid']");
     private final SelenideElement getUser = $x("//span[text()='Поиск']/..");
@@ -36,34 +37,18 @@ public class InventoryPage {
         Selenide.open(URL);
     }
 
-
     public void filter() {
         filter.click();
     }
 
-//    public void setDateInputs(){
-//        buttonDate.shouldBe(Condition.visible, Duration.ofSeconds(10)).click();
-//        calendarTable.shouldBe(Condition.visible);
-//        calendarTable.$x(".//span[text()='12']").click();
-//        buttonDate.shouldBe(Condition.visible, Duration.ofSeconds(10)).click();
-//        if (!calendarTable.isDisplayed()) {
-//            buttonDate.click();
-//            calendarTable.shouldBe(visible);
-//        }
-//        calendarTable.$x(".//span[text()='25']").click();
-//
-//
-//
-//    }
-
     public void setDateInputs() {
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now().minusDays(3);
         String fromDate = today.format(DateTimeFormatter.ofPattern("dd"));
 
         LocalDate to = today.plusDays(13);
         String toDate = to.format(DateTimeFormatter.ofPattern("dd"));
 
-        buttonFromeDate.shouldBe(Condition.visible, Duration.ofSeconds(10)).click();
+        buttonFromDate.shouldBe(Condition.visible, Duration.ofSeconds(10)).click();
         calendarTable.shouldBe(Condition.visible);
         calendarTable.$x(".//span[text()='" + fromDate + "']").click();
 
@@ -107,11 +92,7 @@ public class InventoryPage {
         button.click();
     }
 
-    public void assertRowsMatchExpectations(
-            ElementsCollection ro,
-            Set<String> allowedStatuses,
-            String expectedCreator,
-            String fromDate, String toDate
+    public void assertRowsMatchExpectations(ElementsCollection ro, Set<String> allowedStatuses, String expectedCreator, String fromDate, String toDate
 
     ) {
         assertEquals(2, dateInputs.size(), "Ожидались два поля фильтрации по дате");
@@ -125,19 +106,17 @@ public class InventoryPage {
 
         List<Executable> checks = new ArrayList<>();
         for (SelenideElement row : rows) {
-            String dateText = row.$x("./td[3]").getText().trim(); // колонка "Дата"
-            String creator = row.$x("./td[4]").getText().trim(); // колонка "Имя создателя"
-            String status = row.$x("./td[6]").getText().trim(); // Статус
+            String dateText = row.$x("./td[3]").should(appear).getText().trim(); // колонка "Дата"
+            String creator = row.$x("./td[4]").should(appear).getText().trim(); // колонка "Имя создателя"
+            String status = row.$x("./td[6]").should(appear).getText().trim(); // Статус
             System.out.println(dateText);
             System.out.println(creator);
             System.out.println(status);
             LocalDateTime actualDate = LocalDateTime.parse(dateText, formatter);
             checks.add(() -> {
-            assertTrue(!actualDate.isBefore(from) && !actualDate.isAfter(to),
-                    "Дата вне диапазона: " + actualDate);
-            assertEquals("Миша", creator, "Создатель не совпадает: " + creator);
-            assertTrue(status.equals("Черновик") || status.equals("Удален"),
-                    "Найден неожиданный статус: " + status + " после фильтрации 'Черновик' и 'Удален'.");
+                assertTrue(!actualDate.isBefore(from) && !actualDate.isAfter(to), "Дата вне диапазона: " + actualDate);
+                assertEquals("Миша", creator, "Создатель не совпадает: " + creator);
+                assertTrue(status.equals("Черновик") || status.equals("Удален"), "Найден неожиданный статус: " + status + " после фильтрации 'Черновик' и 'Удален'.");
             });
 
         }
