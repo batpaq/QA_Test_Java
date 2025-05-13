@@ -44,14 +44,17 @@ public class InventoryPage {
     public void setDateInputs() {
         LocalDate today = LocalDate.now().minusDays(3);
         String fromDate = today.format(DateTimeFormatter.ofPattern("dd"));
+
         LocalDate to = today.plusDays(13);
         String toDate = to.format(DateTimeFormatter.ofPattern("dd"));
 
         buttonFromDate.shouldBe(Condition.visible, Duration.ofSeconds(10)).click();
         calendarTable.shouldBe(Condition.visible);
         calendarTable.$x(".//span[text()='" + fromDate + "']").click();
+
         buttonToDate.shouldBe(Condition.visible, Duration.ofSeconds(10)).click();
-        calendarTable.$x(".//span[text()='" + toDate + "']").shouldBe(Condition.visible, Duration.ofSeconds(5)).click();
+
+        calendarTable.$x(".//span[text()='" + toDate + "']").click();
     }
 
     public void user() {
@@ -106,6 +109,9 @@ public class InventoryPage {
             String dateText = row.$x("./td[3]").should(appear).getText().trim(); // колонка "Дата"
             String creator = row.$x("./td[4]").should(appear).getText().trim(); // колонка "Имя создателя"
             String status = row.$x("./td[6]").should(appear).getText().trim(); // Статус
+            System.out.println(dateText);
+            System.out.println(creator);
+            System.out.println(status);
             LocalDateTime actualDate = LocalDateTime.parse(dateText, formatter);
             checks.add(() -> {
                 assertTrue(!actualDate.isBefore(from) && !actualDate.isAfter(to), "Дата вне диапазона: " + actualDate);
