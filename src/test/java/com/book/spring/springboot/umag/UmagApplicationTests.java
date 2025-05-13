@@ -5,6 +5,10 @@ import com.codeborne.selenide.SelenideElement;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.Set;
 
 import static com.codeborne.selenide.Condition.*;
@@ -20,17 +24,20 @@ class UmagApplicationTests extends BaseTest {
     void contextLoads() {
         LoginPage method = new LoginPage();
         method.setPhone(phone, password);
-        SLEEP.shouldBe(disappear, Duration.ofSeconds(10));
+        SLEEP.shouldBe(exist, Duration.ofSeconds(10));
         InventoryPage filter = new InventoryPage();
-        SLEEP.shouldBe(disappear, Duration.ofSeconds(10));
+        SLEEP.shouldBe(exist, Duration.ofSeconds(10));
         filter.filter();
         filter.setDateInputs();
         filter.user();
         filter.statusDocument();
         filter.setButton();
-        SLEEP.shouldBe(disappear, Duration.ofSeconds(10));
-        String fromDate = "10.05.2025 00:00";
-        String toDate = "25.05.2025 23:59";
+        SLEEP.shouldBe(exist, Duration.ofSeconds(10));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm", Locale.ENGLISH);
+        LocalDateTime from = LocalDate.now().minusDays(3).atStartOfDay();
+        LocalDateTime to = from.plusDays(13);
+        String fromDate = from.format(formatter);
+        String toDate = to.format(formatter);
         ElementsCollection rows = $$x("//table[contains(@class, 'p-datatable')]/tbody/tr");
         Set<String> allowedStatuses = Set.of("Черновик", "Удален");
         String expectedCreator = "Миша";
