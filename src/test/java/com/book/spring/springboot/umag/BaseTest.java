@@ -9,8 +9,8 @@ public class BaseTest {
     @BeforeEach
     public void setUp() {
         Configuration.baseUrl = "https://dev-web.umag.kz";
-        Configuration.timeout     = 10000;
-        Configuration.pageLoadTimeout=100000;
+        Configuration.timeout = 10000;
+        Configuration.pageLoadTimeout = 100000;
     }
 
     @AfterEach
